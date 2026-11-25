@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="RogueHockey — Tactile rogue-lite air hockey for tablets and browsers. Flick, tilt, chain Chips × Mult combos, shatter obstacles, and draft Relics." />
+  <meta name="theme-color" content="#1A2433" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>RogueHockey — Tactile Rogue-Lite Air Hockey</title>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Main Game Stage (Table + HUD) -->
+    <div id="game-layout" class="game-layout">
+      <!-- Top / Side Scoreboard HUD -->
+      <header class="hud-panel" aria-label="Game Scoreboard">
+        <div class="hud-row hud-row-primary">
+          <div id="ante-badge" class="ante-badge">
+            <span id="ante-label" class="ante-sub">ANTE 1</span>
+            <strong id="round-label" class="ante-main">RND 1/3</strong>
+          </div>
+
+          <div class="score-card">
+            <div class="score-card-header">
+              <span id="round-score" class="score-value tabular">0</span>
+              <span id="target-score" class="score-target tabular">TARGET 450</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+              <div id="score-progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div id="coins-pill" class="coins-pill tabular" title="Coins">$4</div>
+
+          <div class="icon-actions">
+            <button id="btn-calibrate" class="icon-btn" type="button" title="Calibrate Tilt Zero" aria-label="Calibrate Tilt Zero">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="7" />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+                <line x1="12" y1="2" x2="12" y2="5" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+                <line x1="2" y1="12" x2="5" y2="12" />
+                <line x1="19" y1="12" x2="22" y2="12" />
+              </svg>
+            </button>
+            <button id="btn-mute" class="icon-btn" type="button" title="Toggle Sound" aria-label="Toggle Sound">
+              <svg id="icon-sound-on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </svg>
+              <svg id="icon-sound-off" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="hud-row hud-row-secondary">
+          <div class="formula-pill" aria-label="Shot Chips times Multiplier">
+            <span id="shot-chips" class="formula-chip tabular">0</span>
+            <span class="formula-op">×</span>
+            <span id="shot-mult" class="formula-mult tabular">1</span>
+            <span id="shot-preview" class="formula-total tabular hidden">= 0</span>
+          </div>
+
+          <div class="flicks-pill" aria-label="Remaining Flicks">
+            <span class="pill-caption">FLICKS</span>
+            <div id="flick-pips" class="flick-pips"></div>
+          </div>
+
+          <div id="hud-relics" class="relics-strip" aria-label="Active Relics"></div>
+        </div>
+
+        <div id="boss-banner" class="info-banner boss-banner hidden"></div>
+        <div id="relic-tooltip" class="info-banner relic-tooltip hidden" role="status"></div>
+      </header>
+
+      <!-- Air Hockey Canvas Area -->
+      <main class="table-stage">
+        <canvas id="table-canvas" aria-label="RogueHockey Air Hockey Table"></canvas>
+      </main>
+
+      <!-- Bottom Control Bar -->
+      <footer class="control-bar">
+        <div class="control-pills">
+          <button id="btn-control-mode" class="pill-btn" type="button">
+            <span class="pill-label">INPUT</span>
+            <strong id="control-mode-value">AUTO</strong>
+          </button>
+          <button id="btn-tilt-mode" class="pill-btn" type="button">
+            <span class="pill-label">TILT</span>
+            <strong id="tilt-mode-value">MED</strong>
+          </button>
+          <button id="btn-enable-sensors" class="pill-btn pill-btn-accent hidden" type="button">
+            <strong>ENABLE TILT</strong>
+          </button>
+        </div>
+
+        <p id="control-hint" class="control-hint">
+          Flick puck or pull back to aim • Tilt tablet or hold Arrow/WASD keys to curve
+        </p>
+
+        <button id="btn-bank-shot" class="bank-btn hidden" type="button">
+          BANK SHOT
+        </button>
+      </footer>
+    </div>
+
+    <!-- Title Screen Overlay -->
+    <section id="screen-title" class="overlay-screen title-screen" aria-label="Welcome to RogueHockey">
+      <div class="title-card">
+        <div class="puck-emblem" aria-hidden="true">
+          <div class="puck-emblem-shell">
+            <div class="puck-emblem-ring">
+              <div class="puck-emblem-core"></div>
+            </div>
+          </div>
+        </div>
+
+        <header class="title-header">
+          <h1 class="game-title">ROGUE HOCKEY</h1>
+          <p class="game-subtitle">Tactile Tabletop Rogue-Lite Air Hockey</p>
+        </header>
+
+        <div class="rules-panel">
+          <h2 class="rules-heading">HOW TO PLAY</h2>
+          <div class="rule-item">
+            <span class="rule-badge badge-coral">FLICK</span>
+            <p>Flick the puck directly or pull back anywhere to slingshot-aim with wall bounce preview.</p>
+          </div>
+          <div class="rule-item">
+            <span class="rule-badge badge-sky">TILT</span>
+            <p>Tilt your tablet (or hold <strong>WASD / Arrow keys</strong> on desktop) while the puck glides to bend around ice walls.</p>
+          </div>
+          <div class="rule-item">
+            <span class="rule-badge badge-amber">COMBO</span>
+            <p>Chain Bumpers (+Chips), Rings (+Mult), Crates, Cryo-Barrels &amp; Power-Ups to beat the Target Score.</p>
+          </div>
+          <div class="rule-item">
+            <span class="rule-badge badge-emerald">SHOP</span>
+            <p>Spend Coins &amp; Interest between rounds on build-defining Relics and permanent Table Upgrades.</p>
+          </div>
+        </div>
+
+        <div class="title-actions">
+          <button id="btn-start-run" class="btn-primary btn-lg" type="button">DROP THE PUCK</button>
+          <a class="apk-link" href="https://github.com/willgorman/roguehockey/releases/tag/latest" target="_blank" rel="noopener">
+            Android Tablet APK available on GitHub Releases →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Round Clear Payout Overlay -->
+    <section id="screen-round-clear" class="overlay-screen modal-backdrop hidden" aria-label="Round Cleared">
+      <div class="modal-card modal-clear">
+        <span id="clear-tag" class="status-tag status-emerald">TABLE CLEARED</span>
+        <div id="clear-score" class="clear-big-score tabular">680 / 450</div>
+
+        <div class="payout-list">
+          <div class="payout-row">
+            <span>Table Clear Reward</span>
+            <strong id="payout-base" class="tabular">+$4</strong>
+          </div>
+          <div class="payout-row">
+            <span id="payout-flicks-label">Remaining Flicks (3)</span>
+            <strong id="payout-flicks" class="tabular">+$3</strong>
+          </div>
+          <div class="payout-row">
+            <span>Interest (+$1 per $5 held)</span>
+            <strong id="payout-interest" class="tabular">+$0</strong>
+          </div>
+        </div>
+
+        <div class="payout-total-row">
+          <span>TOTAL PAYOUT</span>
+          <strong id="payout-total" class="tabular">+$7</strong>
+        </div>
+
+        <button id="btn-open-shop" class="btn-sky btn-lg" type="button">VISIT PRO SHOP →</button>
+      </div>
+    </section>
+
+    <!-- Pro Shop Screen -->
+    <section id="screen-shop" class="overlay-screen shop-screen hidden" aria-label="Pro Shop">
+      <div class="shop-container">
+        <header class="shop-header">
+          <div>
+            <h2 class="shop-title">PRO SHOP</h2>
+            <p class="shop-subtitle">Draft Relics &amp; Upgrades to break the next table</p>
+          </div>
+          <div id="shop-coins" class="coins-pill coins-pill-lg tabular">$10</div>
+        </header>
+
+        <div id="shop-next-preview" class="next-preview-card">
+          <div>
+            <div id="shop-next-label" class="next-label">UPCOMING: ANTE 1 • ROUND 2/3</div>
+            <div id="shop-next-boss-desc" class="next-desc hidden"></div>
+          </div>
+          <div class="next-target-box">
+            <span class="next-target-caption">TARGET SCORE</span>
+            <strong id="shop-next-target" class="next-target-value tabular">650</strong>
+          </div>
+        </div>
+
+        <div class="owned-relics-tray">
+          <div class="tray-header">
+            <span id="shop-relics-count">ACTIVE RELICS (0/5)</span>
+            <span id="shop-upgrades-summary" class="tray-stats">Flicks: 5 • +0 Chips • +0 Mult</span>
+          </div>
+          <div id="shop-owned-relics" class="owned-relic-slots"></div>
+          <div id="shop-sell-bar" class="sell-bar hidden">
+            <div>
+              <strong id="sell-relic-title"></strong>
+              <p id="sell-relic-desc"></p>
+            </div>
+            <button id="btn-sell-relic" class="btn-danger" type="button">SELL +$3</button>
+          </div>
+        </div>
+
+        <div id="shop-offers-grid" class="shop-grid"></div>
+
+        <footer class="shop-footer">
+          <button id="btn-reroll" class="btn-outline" type="button">REROLL ($3)</button>
+          <button id="btn-next-round" class="btn-emerald btn-lg" type="button">NEXT TABLE →</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Game Over Overlay -->
+    <section id="screen-game-over" class="overlay-screen modal-backdrop hidden" aria-label="Run Complete">
+      <div class="modal-card modal-over">
+        <span class="status-tag status-coral">OUT OF FLICKS</span>
+        <h2 class="modal-title">RUN COMPLETE</h2>
+        <p id="gameover-where" class="modal-sub">Stopped at Ante 1 • Round 2</p>
+
+        <div class="stats-list">
+          <div class="payout-row"><span>Rounds Cleared</span><strong id="stat-rounds" class="tabular">0</strong></div>
+          <div class="payout-row"><span>Best Single Shot</span><strong id="stat-best-shot" class="tabular">0</strong></div>
+          <div class="payout-row"><span>Total Run Score</span><strong id="stat-total-score" class="tabular">0</strong></div>
+          <div class="payout-row"><span>Top-Shelf Goals</span><strong id="stat-goals" class="tabular">0</strong></div>
+          <div class="payout-row"><span>Obstacles Shattered</span><strong id="stat-obstacles" class="tabular">0</strong></div>
+        </div>
+
+        <div id="gameover-relics" class="gameover-relics hidden"></div>
+
+        <div class="gameover-actions">
+          <button id="btn-to-title" class="btn-outline-dark" type="button">TITLE</button>
+          <button id="btn-new-run" class="btn-primary" type="button">NEW RUN</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

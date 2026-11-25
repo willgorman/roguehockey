@@ -29,6 +29,14 @@ A **native Android portrait tablet rogue-lite air hockey game** built with Kotli
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk` and can be sideloaded onto an Android tablet via `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
+## Play in Browser (Web Edition)
+
+A full-featured HTML5 Canvas web edition lives in `web/` and is automatically deployed to **GitHub Pages** via `.github/workflows/deploy-pages.yml`:
+
+- **Play Online**: https://willgorman.github.io/roguehockey/
+- Supports touch flicking, mouse slingshot aiming, mobile/tablet `DeviceOrientation` tilt steering, desktop `WASD`/Arrow tilt steering, and Web Audio procedural sound effects.
+- Run web engine unit tests locally with `node --test web/test/engine.test.mjs`.
+
 ## Automated APK Releases
 
-Every push to `main` (or any `v*` tag, or manual workflow dispatch) runs `.github/workflows/release-apk.yml`, which executes the unit tests, builds the Android APK, and publishes it to GitHub Releases.
+Every push to `main` (when Android files change), any `v*` tag, or manual workflow dispatch runs `.github/workflows/release-apk.yml`, which executes the unit tests, builds the Android APK, and publishes it to GitHub Releases.

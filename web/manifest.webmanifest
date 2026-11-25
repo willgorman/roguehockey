@@ -1,0 +1,18 @@
+{
+  "name": "RogueHockey",
+  "short_name": "RogueHockey",
+  "description": "Tactile rogue-lite air hockey for tablets and browsers.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1A2433",
+  "theme_color": "#1A2433",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
